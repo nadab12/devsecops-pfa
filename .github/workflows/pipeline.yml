@@ -1,0 +1,21 @@
+name: DevSecOps Pipeline
+
+on: [push]
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t juice-shop:${{ github.sha }} .
+
+  semgrep-scan:
+    runs-on: ubuntu-latest
+    needs: build-image
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Semgrep
+        run: semgrep scan --config auto --error

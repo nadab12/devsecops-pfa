@@ -45,3 +45,20 @@ jobs:
           image-ref: juice-shop:scan
           severity: CRITICAL,HIGH
           exit-code: 1
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [semgrep-scan, gitleaks-scan, trivy-scan]
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/app
+            git pull
+            docker build -t juice-shop:latest .
+            docker stop juice-shop || true
+            docker rm juice-shop || true
+            docker run -d -p 3000:3000 --name juice-shop juice-shop:latest

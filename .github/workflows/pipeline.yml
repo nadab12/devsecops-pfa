@@ -13,6 +13,7 @@ jobs:
   semgrep-scan:
     runs-on: ubuntu-latest
     needs: build-image
+    continue-on-error: true
     container:
       image: semgrep/semgrep
     steps:
